@@ -1,13 +1,61 @@
-import melanPhoto from '../assests/melanakash.png'
+import { useState } from 'react';
+import melanPhoto from '../assests/melanakash.png';
+import {
+    AntigravityIcon,
+    OpenAIIcon,
+    GeminiIcon,
+    ClaudeIcon,
+    ReactIcon,
+    NextIcon,
+    TypeScriptIcon,
+    NodeIcon,
+    TailwindIcon,
+    PostgresIcon,
+    SpringBootIcon,
+    DotNetIcon,
+    DockerIcon,
+    PostmanIcon,
+    GitHubIcon
+} from './TechIcons';
 
 export default function About() {
+    const [selectedCategory, setSelectedCategory] = useState('All');
+
     const tools = [
-        { name: 'VS Code', icon: './assets/vscode.png' },
-        { name: 'Firebase', icon: './assets/firebase.png' },
-        { name: 'MongoDB', icon: './assets/mongodb.png' },
-        { name: 'Figma', icon: './assets/figma.png' },
-        { name: 'Git', icon: './assets/git.png' },
+        // AI & Agentic Tools
+        { name: 'Google Antigravity', category: 'AI & Agentic', isSvg: true, icon: <AntigravityIcon /> },
+        { name: 'OpenAI / GPT', category: 'AI & Agentic', isSvg: true, icon: <OpenAIIcon /> },
+        { name: 'Google Gemini', category: 'AI & Agentic', isSvg: true, icon: <GeminiIcon /> },
+        { name: 'Anthropic Claude', category: 'AI & Agentic', isSvg: true, icon: <ClaudeIcon /> },
+
+        // Full Stack & Core Tech
+        { name: 'React', category: 'Full Stack', isSvg: true, icon: <ReactIcon /> },
+        { name: 'Next.js', category: 'Full Stack', isSvg: true, icon: <NextIcon /> },
+        { name: 'TypeScript', category: 'Full Stack', isSvg: true, icon: <TypeScriptIcon /> },
+        { name: 'Node.js', category: 'Full Stack', isSvg: true, icon: <NodeIcon /> },
+        { name: 'Spring Boot', category: 'Full Stack', isSvg: true, icon: <SpringBootIcon /> },
+        { name: '.NET', category: 'Full Stack', isSvg: true, icon: <DotNetIcon /> },
+        { name: 'Tailwind CSS', category: 'Full Stack', isSvg: true, icon: <TailwindIcon /> },
+
+        // Databases & Cloud
+        { name: 'PostgreSQL', category: 'Database & Cloud', isSvg: true, icon: <PostgresIcon /> },
+        { name: 'MongoDB', category: 'Database & Cloud', isSvg: false, icon: './assets/mongodb.png' },
+        { name: 'Firebase', category: 'Database & Cloud', isSvg: false, icon: './assets/firebase.png' },
+        { name: 'Docker', category: 'Database & Cloud', isSvg: true, icon: <DockerIcon /> },
+
+        // Dev Tools & Workflow
+        { name: 'VS Code', category: 'Dev Tools', isSvg: false, icon: './assets/vscode.png' },
+        { name: 'Git', category: 'Dev Tools', isSvg: false, icon: './assets/git.png' },
+        { name: 'GitHub', category: 'Dev Tools', isSvg: true, icon: <GitHubIcon /> },
+        { name: 'Postman', category: 'Dev Tools', isSvg: true, icon: <PostmanIcon /> },
+        { name: 'Figma', category: 'Dev Tools', isSvg: false, icon: './assets/figma.png' },
     ];
+
+    const categories = ['All', 'AI & Agentic', 'Full Stack', 'Database & Cloud', 'Dev Tools'];
+
+    const filteredTools = selectedCategory === 'All'
+        ? tools
+        : tools.filter(t => t.category === selectedCategory);
 
     const data = [
         {
@@ -31,12 +79,12 @@ export default function About() {
     ];
 
     const skills = [
-        { category: 'Frontend', items: 'React, Tailwind CSS, HTML5, CSS3' },
-        { category: 'Backend', items: 'Node.js, Express.js, Spring Boot, .NET' },
-        { category: 'Mobile', items: 'React Native, Expo, Android' },
-        { category: 'Database', items: 'MongoDB, MySQL, PostgreSQL, Firebase, Supabase, NeonDB' },
-        { category: 'AI / ML', items: 'OpenRouter, Vercel AI SDK, LLM APIs, Meta Llama 3.1, Claude, AI Studio' },
-        { category: 'Tools', items: 'Git, GitHub, REST APIs, Postman, VS Code, SEO, Inngest, CodeRabbit' },
+        { category: 'Frontend', items: 'React, Next.js, Tailwind CSS, JavaScript (ES6+), TypeScript, HTML5, CSS3' },
+        { category: 'Backend & APIs', items: 'Node.js, Express.js, Spring Boot, .NET, RESTful APIs, WebSockets' },
+        { category: 'Mobile Engineering', items: 'React Native, Expo, Android SDK' },
+        { category: 'Databases & ORM', items: 'PostgreSQL, MongoDB, MySQL, Firebase, Supabase, NeonDB' },
+        { category: 'AI & LLM Integration', items: 'Google Antigravity, OpenAI, Gemini, Claude, OpenRouter, Vercel AI SDK, Meta Llama' },
+        { category: 'Tools & DevOps', items: 'Git, GitHub, Docker, Postman, Figma, VS Code, CI/CD, SEO' },
     ];
 
     return (
@@ -54,7 +102,7 @@ export default function About() {
                     </div>
                 </div>
                 <div className="flex-1">
-                    <p className="mb-10 max-w-2xl font-Ovo">
+                    <p className="mb-10 max-w-2xl font-Ovo leading-relaxed">
                         Associate Software Engineer with hands-on experience across the MERN and PERN stacks, Spring Boot, and .NET, having shipped full-stack and AI-integrated web and mobile applications including an AI-powered website builder, a real-time video conferencing app, and an AI habit-coaching app. Comfortable working across frontend and backend layers, with growing experience integrating LLM APIs into production apps. Also active as a startup co-founder leading frontend development and on-page SEO.
                     </p>
 
@@ -69,15 +117,53 @@ export default function About() {
                         ))}
                     </ul>
 
-                    <h4 className="my-6 text-gray-700 font-Ovo dark:text-white/80">Tools i use</h4>
+                    {/* Tools I Use Section */}
+                    <div className="mt-8">
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <h4 className="text-gray-700 font-Ovo dark:text-white/80 text-lg">
+                                Tools &amp; Technologies I use
+                            </h4>
 
-                    <ul className="flex items-center gap-3 sm:gap-5">
-                        {tools.map((tool) => (
-                            <li key={tool.name} className="flex items-center justify-center w-12 sm:w-14 aspect-square border border-gray-300 dark:border-white/30 rounded-lg cursor-pointer hover:-translate-y-1 duration-500">
-                                <img src={tool.icon} alt={tool.name} className="w-5 sm:w-7" />
-                            </li>
-                        ))}
-                    </ul>
+                            {/* Category Filter Chips */}
+                            <div className="flex flex-wrap gap-1.5">
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`text-[11px] px-2.5 py-1 rounded-full font-medium transition-all ${
+                                            selectedCategory === cat
+                                                ? 'bg-sky-500 text-white shadow-sm'
+                                                : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/70 hover:bg-gray-200 dark:hover:bg-white/20'
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Interactive Tools Grid */}
+                        <div className="flex flex-wrap items-center gap-3">
+                            {filteredTools.map((tool) => (
+                                <div
+                                    key={tool.name}
+                                    className="group relative flex items-center justify-center w-12 sm:w-14 aspect-square border border-gray-300 dark:border-white/30 rounded-xl cursor-pointer hover:-translate-y-1.5 duration-300 hover:shadow-md hover:border-sky-500 bg-white dark:bg-white/5 transition-all"
+                                    title={tool.name}
+                                >
+                                    {tool.isSvg ? (
+                                        tool.icon
+                                    ) : (
+                                        <img src={tool.icon} alt={tool.name} className="w-5 sm:w-7 object-contain" />
+                                    )}
+
+                                    {/* Hover Tooltip */}
+                                    <span className="pointer-events-none absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gray-900 text-white text-[10px] px-2 py-0.5 rounded shadow-lg whitespace-nowrap z-30 font-medium">
+                                        {tool.name}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -95,5 +181,5 @@ export default function About() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
