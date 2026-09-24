@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ProfileProvider } from './context/ProfileContext';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Work from './components/Work';
@@ -32,16 +33,18 @@ function MainPortfolio() {
 
 export default function App() {
     return (
-        <BrowserRouter>
-            <Routes>
-                {/* Client Portfolio */}
-                <Route path="/" element={<MainPortfolio />} />
+        <ProfileProvider>
+            <BrowserRouter>
+                <Routes>
+                    {/* Client Portfolio */}
+                    <Route path="/" element={<MainPortfolio />} />
 
-                {/* Admin Routes */}
-                <Route path="/admin/login" element={<Login />} />
-                <Route path="/admin" element={<Dashboard />} />
-                <Route path="/admin/*" element={<Dashboard />} />
-            </Routes>
-        </BrowserRouter>
+                    {/* Admin Routes */}
+                    <Route path="/admin/login" element={<Login />} />
+                    <Route path="/admin" element={<Dashboard />} />
+                    <Route path="/admin/*" element={<Dashboard />} />
+                </Routes>
+            </BrowserRouter>
+        </ProfileProvider>
     );
 }

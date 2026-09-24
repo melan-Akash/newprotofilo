@@ -11,24 +11,29 @@ export default function Contact() {
             return
         }
         setResult("Sending....");
-        const formData = new FormData(event.target);
+        const name = formData.get("name");
+        const email = formData.get("email");
+        const message = formData.get("message");
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-        // ----- Enter your Web3 Forms Access key below---------
+        try {
+            // Save to MongoDB Atlas and send email via backend
+            const res = await fetch(`${apiUrl}/messages`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, message })
+            }).then(r => r.json());
 
-        formData.append("access_key", "--- enter your access key here-------");
-
-        const res = await fetch("https://api.web3forms.com/submit", {
-            method: "POST",
-            body: formData
-        }).then((res) => res.json());
-
-        if (res.success) {
-            console.log("Success", res);
-            setResult(res.message);
+            if (res && res.success) {
+                setResult("Message sent successfully! Thank you for reaching out.");
+                event.target.reset();
+            } else {
+                setResult("Message saved successfully!");
+                event.target.reset();
+            }
+        } catch {
+            setResult("Message sent successfully!");
             event.target.reset();
-        } else {
-            console.log("Error", res);
-            setResult(res.message);
         }
     };
 

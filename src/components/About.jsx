@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useProfile } from '../context/ProfileContext';
 import melanPhoto from '../assests/melanakash.png';
 import {
     AntigravityIcon,
@@ -19,7 +20,9 @@ import {
 } from './TechIcons';
 
 export default function About() {
+    const { profile } = useProfile();
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const avatarSrc = profile?.avatar || melanPhoto;
 
     const tools = [
         // AI & Agentic Tools
@@ -94,7 +97,7 @@ export default function About() {
 
             <div className="flex w-full flex-col lg:flex-row items-center gap-20 my-20">
                 <div className="max-w-max mx-auto relative">
-                    <img src={melanPhoto} alt="Melan Akash" className="w-64 sm:w-80 rounded-3xl max-w-none object-cover" />
+                    <img src={avatarSrc} alt={profile?.name || "Melan Akash"} className="w-64 sm:w-80 rounded-3xl max-w-none object-cover" />
 
                     <div className="bg-white w-1/2 aspect-square absolute right-0 bottom-0 rounded-full translate-x-1/4 translate-y-1/3 shadow-[0_4px_55px_rgba(14,165,233,0.18)] flex items-center justify-center">
                         <img src="./assets/circular-text.png" alt="" className="w-full animate-spin_slow" />
@@ -103,7 +106,7 @@ export default function About() {
                 </div>
                 <div className="flex-1">
                     <p className="mb-10 max-w-2xl font-Ovo leading-relaxed">
-                        Associate Software Engineer with hands-on experience across the MERN and PERN stacks, Spring Boot, and .NET, having shipped full-stack and AI-integrated web and mobile applications including an AI-powered website builder, a real-time video conferencing app, and an AI habit-coaching app. Comfortable working across frontend and backend layers, with growing experience integrating LLM APIs into production apps. Also active as a startup co-founder leading frontend development and on-page SEO.
+                        {profile?.about || "Associate Software Engineer with hands-on experience across the MERN and PERN stacks, Spring Boot, and .NET, having shipped full-stack and AI-integrated web and mobile applications including an AI-powered website builder, a real-time video conferencing app, and an AI habit-coaching app. Comfortable working across frontend and backend layers, with growing experience integrating LLM APIs into production apps. Also active as a startup co-founder leading frontend development and on-page SEO."}
                     </p>
 
                     <ul className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl">

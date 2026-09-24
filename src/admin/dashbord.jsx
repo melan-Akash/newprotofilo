@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Slidebar from './slidebar';
 import AddPortfolio from './addProtofoilo';
 import EmailInbox from './email';
+import ProfileSetting from './profileSetting';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -22,8 +23,9 @@ export default function Dashboard() {
     // Fetch projects from server or localStorage
     const loadProjects = async () => {
         setLoading(true);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
         try {
-            const res = await fetch('http://localhost:5000/api/projects').then(r => r.json()).catch(() => null);
+            const res = await fetch(`${apiUrl}/projects`).then(r => r.json()).catch(() => null);
             if (res && res.success && res.projects) {
                 // Merge with any custom local projects
                 const localCustom = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
@@ -60,7 +62,8 @@ export default function Dashboard() {
 
         // Delete from server
         try {
-            await fetch(`http://localhost:5000/api/projects/${id}`, { method: 'DELETE' });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            await fetch(`${apiUrl}/projects/${id}`, { method: 'DELETE' });
         } catch {
             // Ignore server errors
         }
@@ -94,7 +97,7 @@ export default function Dashboard() {
                             </svg>
                         </button>
                         <h2 className="text-lg font-bold text-gray-900 dark:text-white capitalize">
-                            {activeTab === 'dashboard' ? 'Overview' : activeTab === 'add' ? 'Add Portfolio' : activeTab === 'manage' ? 'All Projects' : 'Inquiries'}
+                            {activeTab === 'dashboard' ? 'Overview' : activeTab === 'add' ? 'Add Portfolio' : activeTab === 'manage' ? 'All Projects' : activeTab === 'profile' ? 'Profile Settings' : 'Inquiries'}
                         </h2>
                     </div>
 
@@ -280,6 +283,10 @@ export default function Dashboard() {
                                 ))}
                             </div>
                         </div>
+                    )}
+
+                    {activeTab === 'profile' && (
+                        <ProfileSetting />
                     )}
 
                     {activeTab === 'messages' && (

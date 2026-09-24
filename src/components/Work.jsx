@@ -107,8 +107,9 @@ export default function Work() {
     // Fetch projects from server or localStorage
     useEffect(() => {
         const load = async () => {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             try {
-                const res = await fetch('http://localhost:5000/api/projects').then(r => r.json()).catch(() => null);
+                const res = await fetch(`${apiUrl}/projects`).then(r => r.json()).catch(() => null);
                 const localCustom = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
 
                 if (res && res.success && res.projects && res.projects.length > 0) {

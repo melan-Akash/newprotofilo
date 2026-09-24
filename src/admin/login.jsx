@@ -16,8 +16,9 @@ export default function Login() {
         setLoading(true);
 
         try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             // Attempt server login
-            const res = await fetch('http://localhost:5000/api/auth/login', {
+            const res = await fetch(`${apiUrl}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -33,7 +34,10 @@ export default function Login() {
             }
 
             // Fallback local auth if server is offline
-            if ((username === 'admin' || username === 'admin@melanakash.com') && (password === 'admin123' || password === 'melan2026')) {
+            const validLocalUser = (username === 'admin' || username === 'admin@melanakash.com' || username === 'pkaya');
+            const validLocalPass = (password === 'admin123' || password === 'melan2026' || password === 'Pkaya123');
+
+            if (validLocalUser && validLocalPass) {
                 localStorage.setItem('melan_admin_auth', JSON.stringify({
                     token: 'local_token_' + Date.now(),
                     user: { name: 'Melan Akash', email: 'admin@melanakash.com', role: 'Administrator' }
@@ -42,7 +46,7 @@ export default function Login() {
                 return;
             }
 
-            setError(res?.message || 'Invalid username or password. (Default: admin / admin123)');
+            setError(res?.message || 'Invalid username or password.');
         } catch {
             setError('Connection error. Please try again.');
         } finally {

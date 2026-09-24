@@ -1,7 +1,10 @@
-import footerLogoLight from '../assests/logo_for_lightmood.png'
-import footerLogoDark from '../assests/logo_fro_darkmood.png'
+import { useProfile } from '../context/ProfileContext';
+import footerLogoLight from '../assests/logo_for_lightmood.png';
+import footerLogoDark from '../assests/logo_fro_darkmood.png';
 
 export default function Footer() {
+    const { profile } = useProfile();
+
     return (
         <footer className='w-full px-[12%] pt-12 pb-6 mt-14 border-t border-gray-200 dark:border-white/10 bg-slate-50 dark:bg-darkTheme transition-colors duration-300'>
             <div className='w-full max-w-6xl mx-auto'>
@@ -10,12 +13,12 @@ export default function Footer() {
                     {/* Column 1: Brand & Bio */}
                     <div className="w-full md:w-[45%] lg:w-[35%] flex flex-col items-center md:items-start text-center md:text-left">
                         <a href="#top" className="inline-block">
-                            <img src={footerLogoLight} alt="Melan Akash" className="w-12 dark:hidden" />
-                            <img src={footerLogoDark} alt="Melan Akash" className="w-12 hidden dark:block" />
+                            <img src={footerLogoLight} alt={profile?.name || "Melan Akash"} className="w-12 dark:hidden" />
+                            <img src={footerLogoDark} alt={profile?.name || "Melan Akash"} className="w-12 hidden dark:block" />
                         </a>
                         <div className='w-full max-w-44 h-px mt-4 bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-white/20'></div>
                         <p className='text-xs sm:text-sm text-gray-600 dark:text-white/70 mt-4 max-w-sm leading-relaxed'>
-                            Associate Software Engineer based in Matara, Sri Lanka. Building full-stack &amp; AI-integrated web and mobile applications.
+                            {profile?.title || 'Associate Software Engineer'} based in {profile?.location || 'Matara, Sri Lanka'}. Building full-stack &amp; AI-integrated web and mobile applications.
                         </p>
                     </div>
 
@@ -35,10 +38,10 @@ export default function Footer() {
                     <div className="w-full md:w-[45%] lg:w-[15%] flex flex-col items-center md:items-start text-center md:text-left">
                         <h3 className='text-sm text-gray-900 dark:text-white font-semibold'>Social Links</h3>
                         <div className="flex flex-col gap-2 mt-4">
-                            <a href="https://github.com/melan-Akash" target="_blank" rel="noreferrer" className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>GitHub</a>
-                            <a href="https://linkedin.com/in/melan-akash-35558a372" target="_blank" rel="noreferrer" className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>LinkedIn</a>
-                            <a href="mailto:melonakash2002@gmail.com" className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>Email</a>
-                            <a href="tel:+94717602792" className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>Phone</a>
+                            <a href={profile?.github || "https://github.com/melan-Akash"} target="_blank" rel="noreferrer" className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>GitHub</a>
+                            <a href={profile?.linkedin || "https://linkedin.com/in/melan-akash-35558a372"} target="_blank" rel="noreferrer" className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>LinkedIn</a>
+                            <a href={`mailto:${profile?.email || "melonakash2002@gmail.com"}`} className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>Email</a>
+                            <a href={`tel:${profile?.phone || "+94717602792"}`} className='text-xs sm:text-sm text-gray-600 dark:text-white/70 hover:text-sky-500 dark:hover:text-sky-400 transition-colors'>Phone</a>
                         </div>
                     </div>
 
@@ -68,11 +71,11 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center">
-                    <p className='text-xs text-gray-500 dark:text-white/60'>© {new Date().getFullYear()} Melan Akash. All rights reserved.</p>
+                    <p className='text-xs text-gray-500 dark:text-white/60'>© {new Date().getFullYear()} {profile?.name || "Melan Akash"}. All rights reserved.</p>
                     <div className="flex items-center gap-5">
-                        <a href='https://github.com/melan-Akash' target="_blank" rel="noreferrer" className='text-xs text-gray-500 dark:text-white/60 hover:text-sky-500 dark:hover:text-white transition-colors'>GitHub</a>
+                        <a href={profile?.github || 'https://github.com/melan-Akash'} target="_blank" rel="noreferrer" className='text-xs text-gray-500 dark:text-white/60 hover:text-sky-500 dark:hover:text-white transition-colors'>GitHub</a>
                         <div className='w-px h-3.5 bg-gray-300 dark:bg-white/20'></div>
-                        <a href='https://linkedin.com/in/melan-akash-35558a372' target="_blank" rel="noreferrer" className='text-xs text-gray-500 dark:text-white/60 hover:text-sky-500 dark:hover:text-white transition-colors'>LinkedIn</a>
+                        <a href={profile?.linkedin || 'https://linkedin.com/in/melan-akash-35558a372'} target="_blank" rel="noreferrer" className='text-xs text-gray-500 dark:text-white/60 hover:text-sky-500 dark:hover:text-white transition-colors'>LinkedIn</a>
                     </div>
                 </div>
             </div>

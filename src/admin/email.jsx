@@ -23,8 +23,9 @@ export default function EmailInbox() {
 
     useEffect(() => {
         const fetchMessages = async () => {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             try {
-                const res = await fetch('http://localhost:5000/api/messages').then(r => r.json());
+                const res = await fetch(`${apiUrl}/messages`).then(r => r.json());
                 if (res && res.success && res.messages && res.messages.length > 0) {
                     setMessages(res.messages);
                 } else {
