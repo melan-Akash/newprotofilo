@@ -12,11 +12,40 @@ export default function Dashboard() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Verify authentication
+    // Verify authentication with backend
     useEffect(() => {
         const authData = localStorage.getItem('melan_admin_auth');
         if (!authData) {
-            navigate('/admin/login');
+            navigate('/admin/login', { replace: true });
+            return;
+        }
+        try {
+            const parsed = JSON.parse(authData);
+            if (!parsed?.token) {
+                localStorage.removeItem('melan_admin_auth');
+                navigate('/admin/login', { replace: true });
+                return;
+            }
+
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            fetch(`${apiUrl}/auth/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${parsed.token}`
+                }
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (!res || !res.success) {
+                    localStorage.removeItem('melan_admin_auth');
+                    navigate('/admin/login', { replace: true });
+                }
+            })
+            .catch(() => {});
+        } catch {
+            localStorage.removeItem('melan_admin_auth');
+            navigate('/admin/login', { replace: true });
         }
     }, [navigate]);
 

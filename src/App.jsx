@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProfileProvider } from './context/ProfileContext';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -31,6 +31,25 @@ function MainPortfolio() {
     );
 }
 
+// Route Guard: Ensures nobody can access /admin without a valid backend authenticated session
+function ProtectedAdmin({ children }) {
+    const authData = localStorage.getItem('melan_admin_auth');
+    if (!authData) {
+        return <Navigate to="/admin/login" replace />;
+    }
+    try {
+        const parsed = JSON.parse(authData);
+        if (!parsed || !parsed.token) {
+            localStorage.removeItem('melan_admin_auth');
+            return <Navigate to="/admin/login" replace />;
+        }
+    } catch {
+        localStorage.removeItem('melan_admin_auth');
+        return <Navigate to="/admin/login" replace />;
+    }
+    return children;
+}
+
 export default function App() {
     return (
         <ProfileProvider>
@@ -39,10 +58,29 @@ export default function App() {
                     {/* Client Portfolio */}
                     <Route path="/" element={<MainPortfolio />} />
 
-                    {/* Admin Routes */}
+                    {/* Admin Login Route */}
                     <Route path="/admin/login" element={<Login />} />
-                    <Route path="/admin" element={<Dashboard />} />
-                    <Route path="/admin/*" element={<Dashboard />} />
+
+                    {/* Protected Admin Routes */}
+                    <Route
+                        path="/admin"
+                        element={
+                            <ProtectedAdmin>
+                                <Dashboard />
+                            </ProtectedAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/*"
+                        element={
+                            <ProtectedAdmin>
+                                <Dashboard />
+                            </ProtectedAdmin>
+                        }
+                    />
+
+                    {/* Fallback to home */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
         </ProfileProvider>

@@ -5,50 +5,44 @@ import navLogoDark from '../assests/logo_for_navbar_darkmood.png';
 
 export default function Login() {
     const navigate = useNavigate();
-    const [username, setUsername] = useState('admin');
-    const [password, setPassword] = useState('admin123');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!username.trim() || !password.trim()) {
+            setError('Please enter both your admin username/email and password.');
+            return;
+        }
+
         setLoading(true);
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            // Attempt server login
+
+            // Attempt strict backend authentication against .env credentials
             const res = await fetch(`${apiUrl}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username: username.trim(), password: password.trim() })
             }).then(r => r.json()).catch(() => null);
 
-            if (res && res.success) {
+            if (res && res.success && res.token) {
                 localStorage.setItem('melan_admin_auth', JSON.stringify({
                     token: res.token,
                     user: res.user
                 }));
-                navigate('/admin');
+                navigate('/admin', { replace: true });
                 return;
             }
 
-            // Fallback local auth if server is offline
-            const validLocalUser = (username === 'admin' || username === 'admin@melanakash.com' || username === 'pkaya');
-            const validLocalPass = (password === 'admin123' || password === 'melan2026' || password === 'Pkaya123');
-
-            if (validLocalUser && validLocalPass) {
-                localStorage.setItem('melan_admin_auth', JSON.stringify({
-                    token: 'local_token_' + Date.now(),
-                    user: { name: 'Melan Akash', email: 'admin@melanakash.com', role: 'Administrator' }
-                }));
-                navigate('/admin');
-                return;
-            }
-
-            setError(res?.message || 'Invalid username or password.');
+            setError(res?.message || 'Access Denied: Invalid admin username or password.');
         } catch {
-            setError('Connection error. Please try again.');
+            setError('Unable to connect to backend server. Make sure server is running on port 5000.');
         } finally {
             setLoading(false);
         }
@@ -67,9 +61,9 @@ export default function Login() {
                         <img src={navLogoLight} alt="Melan Akash" className="w-28 mx-auto dark:hidden" />
                         <img src={navLogoDark} alt="Melan Akash" className="w-28 mx-auto hidden dark:block" />
                     </Link>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Portal</h2>
-                    <p className="text-sm text-gray-500 dark:text-white/60 mt-1">
-                        Sign in to manage projects &amp; portfolio content
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Access</h2>
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-white/60 mt-1">
+                        Enter your authorized administrator credentials to continue.
                     </p>
                 </div>
 
@@ -84,31 +78,30 @@ export default function Login() {
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div>
                         <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-white/80 mb-1.5">
-                            Username or Email
+                            Admin Username or Email
                         </label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-white/15 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm outline-none focus:border-sky-500 transition-colors"
-                            placeholder="e.g. admin"
+                            placeholder="e.g. pkaya or pkaya@gmail.com"
+                            autoComplete="username"
                             required
                         />
                     </div>
 
                     <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-white/80">
-                                Password
-                            </label>
-                            <span className="text-xs text-gray-400">Default: admin123</span>
-                        </div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-white/80 mb-1.5">
+                            Admin Password
+                        </label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-white/15 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm outline-none focus:border-sky-500 transition-colors"
                             placeholder="••••••••"
+                            autoComplete="current-password"
                             required
                         />
                     </div>
@@ -121,7 +114,7 @@ export default function Login() {
                         {loading ? (
                             <>
                                 <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Authenticating...
+                                Verifying Credentials...
                             </>
                         ) : (
                             'Sign In to Dashboard'
