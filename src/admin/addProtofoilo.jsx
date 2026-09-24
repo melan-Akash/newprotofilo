@@ -92,8 +92,10 @@ export default function AddPortfolio({ onProjectAdded }) {
             formData.append('github', github);
             formData.append('live', live);
 
-            // Add images as JSON string for base64 / URL fallbacks
-            formData.append('images', JSON.stringify(finalImages));
+            // Only pass URL strings (not giant base64 data URLs) in the text 'images' field
+            // Actual images selected from local files will be uploaded via 'imageFiles'
+            const externalOrAssetUrls = finalImages.filter(img => !img.startsWith('data:image'));
+            formData.append('images', JSON.stringify(externalOrAssetUrls));
 
             // Append any actual File objects
             imageFiles.forEach((file) => {
@@ -103,13 +105,21 @@ export default function AddPortfolio({ onProjectAdded }) {
             });
 
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const res = await fetch(`${apiUrl}/projects`, {
+            const response = await fetch(`${apiUrl}/projects`, {
                 method: 'POST',
                 body: formData
-            }).then(r => r.json());
+            });
 
-            if (!res || !res.success) {
-                throw new Error(res?.message || 'Server failed to save project.');
+            const responseText = await response.text();
+            let res;
+            try {
+                res = JSON.parse(responseText);
+            } catch {
+                throw new Error(`Server returned error (${response.status}): ${responseText.slice(0, 120)}`);
+            }
+
+            if (!response.ok || !res || !res.success) {
+                throw new Error(res?.message || `Failed to save project (HTTP ${response.status})`);
             }
 
             const savedProject = res.project || newProjectData;
