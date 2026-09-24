@@ -112,19 +112,30 @@ export default function Work() {
                 const res = await fetch(`${apiUrl}/projects`).then(r => r.json()).catch(() => null);
                 const localCustom = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
 
-                if (res && res.success && res.projects && res.projects.length > 0) {
-                    // Combine server projects with any local ones that might not be synced
-                    const serverIds = new Set(res.projects.map(p => p.id));
-                    const extraLocal = localCustom.filter(p => !serverIds.has(p.id));
-                    setProjects([...extraLocal, ...res.projects]);
-                } else if (localCustom.length > 0) {
-                    setProjects([...localCustom, ...initialProjects]);
-                }
+                const serverList = (res && res.success && Array.isArray(res.projects)) ? res.projects : [];
+
+                // Combine server projects with local custom projects
+                const customProjects = [...serverList];
+                localCustom.forEach(lp => {
+                    const id = lp._id || lp.id;
+                    const exists = customProjects.some(cp => (cp._id || cp.id) === id || cp.name === lp.name);
+                    if (!exists) customProjects.push(lp);
+                });
+
+                // Preserve initialProjects, avoiding duplicates
+                const customNames = new Set(customProjects.map(p => p.name?.toLowerCase().trim()));
+                const customIds = new Set(customProjects.map(p => (p._id || p.id)?.toString()));
+                const filteredInitial = initialProjects.filter(ip =>
+                    !customIds.has(ip.id) && !customNames.has(ip.name?.toLowerCase().trim())
+                );
+
+                // Show added projects on top, followed by existing portfolio projects
+                setProjects([...customProjects, ...filteredInitial]);
             } catch {
                 const localCustom = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
-                if (localCustom.length > 0) {
-                    setProjects([...localCustom, ...initialProjects]);
-                }
+                const customNames = new Set(localCustom.map(p => p.name?.toLowerCase().trim()));
+                const filteredInitial = initialProjects.filter(ip => !customNames.has(ip.name?.toLowerCase().trim()));
+                setProjects([...localCustom, ...filteredInitial]);
             }
         };
 
@@ -143,30 +154,30 @@ export default function Work() {
     };
 
     return (
-        <div id="work" className="w-full px-[12%] py-10 scroll-mt-20">
+        <div id="work" className="w-full px-[8%] sm:px-[12%] py-10 scroll-mt-20">
             <h4 className="text-center mb-2 text-lg font-Ovo">My portfolio</h4>
-            <h2 className="text-center text-5xl font-Ovo">My latest work</h2>
-            <p className="text-center max-w-2xl mx-auto mt-5 mb-12 font-Ovo">
+            <h2 className="text-center text-4xl sm:text-5xl font-Ovo">My latest work</h2>
+            <p className="text-center max-w-2xl mx-auto mt-4 mb-10 font-Ovo text-sm sm:text-base text-gray-600 dark:text-white/70">
                 A collection of full-stack, AI-integrated, and mobile projects showcasing my expertise across modern software engineering stacks.
             </p>
 
-            <div className="grid grid-cols-auto my-10 gap-5 dark:text-black">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 gap-6">
                 {projects.map((project) => (
                     <div
-                        key={project.id || project.name}
+                        key={project._id || project.id || project.name}
                         onClick={() => openModal(project)}
-                        className="aspect-square bg-no-repeat bg-cover bg-center rounded-2xl relative cursor-pointer group shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-white/10"
+                        className="aspect-[4/3] sm:aspect-square bg-no-repeat bg-cover bg-top rounded-2xl relative cursor-pointer group shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-gray-200 dark:border-white/10"
                         style={{ backgroundImage: `url(${project.image || project.images?.[0] || './assets/work-1.png'})` }}
                     >
                         {/* Overlay gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-300"></div>
 
                         {/* Card Info Box */}
-                        <div className="bg-white/95 backdrop-blur-md w-11/12 rounded-xl absolute bottom-4 left-1/2 -translate-x-1/2 py-3 px-4 flex items-center justify-between duration-500 group-hover:bottom-5 shadow-lg">
+                        <div className="bg-white/95 dark:bg-[#0c182d]/95 backdrop-blur-md w-11/12 rounded-xl absolute bottom-3 left-1/2 -translate-x-1/2 py-2.5 px-3.5 flex items-center justify-between duration-300 group-hover:bottom-4 shadow-lg border border-gray-100 dark:border-white/10">
                             <div className="min-w-0 pr-2">
-                                <h2 className="font-semibold text-sm truncate text-gray-900">{project.name}</h2>
-                                <p className="text-xs text-gray-600 truncate">{project.description}</p>
-                                <p className="text-[10px] text-sky-600 font-medium mt-0.5 truncate">{project.tech}</p>
+                                <h2 className="font-semibold text-sm truncate text-gray-900 dark:text-white">{project.name}</h2>
+                                <p className="text-xs text-gray-600 dark:text-white/70 truncate">{project.description}</p>
+                                <p className="text-[10px] text-sky-600 dark:text-sky-400 font-medium mt-0.5 truncate">{project.tech}</p>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                                 {project.live && (
@@ -174,10 +185,10 @@ export default function Work() {
                                         href={project.live}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="border rounded-full border-gray-300 w-8 h-8 flex items-center justify-center hover:bg-sky-100 transition"
+                                        className="border rounded-full border-gray-300 dark:border-white/20 w-7 h-7 flex items-center justify-center hover:bg-sky-100 dark:hover:bg-white/10 transition text-gray-700 dark:text-white"
                                         title="Live Demo"
                                     >
-                                        <img src="./assets/send-icon.png" alt="Live" className="w-4" />
+                                        <img src="./assets/send-icon.png" alt="Live" className="w-3.5 dark:invert" />
                                     </a>
                                 )}
                                 {project.github && (
@@ -185,10 +196,10 @@ export default function Work() {
                                         href={project.github}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="border rounded-full border-gray-300 w-8 h-8 flex items-center justify-center hover:bg-sky-100 transition"
+                                        className="border rounded-full border-gray-300 dark:border-white/20 w-7 h-7 flex items-center justify-center hover:bg-sky-100 dark:hover:bg-white/10 transition text-gray-700 dark:text-white"
                                         title="GitHub"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                                         </svg>
                                     </a>

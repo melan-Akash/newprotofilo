@@ -82,14 +82,15 @@ export default function Dashboard() {
     };
 
     const handleDeleteProject = async (id) => {
+        if (!id) return;
         if (!window.confirm('Are you sure you want to delete this project?')) return;
 
-        // Delete from local
+        // Delete from local storage
         const localCustom = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
-        const updatedLocal = localCustom.filter(p => p.id !== id);
+        const updatedLocal = localCustom.filter(p => (p.id !== id && p._id !== id));
         localStorage.setItem('melan_custom_projects', JSON.stringify(updatedLocal));
 
-        // Delete from server
+        // Delete from server (MongoDB)
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             await fetch(`${apiUrl}/projects/${id}`, { method: 'DELETE' });
@@ -97,7 +98,7 @@ export default function Dashboard() {
             // Ignore server errors
         }
 
-        setProjects(prev => prev.filter(p => p.id !== id));
+        setProjects(prev => prev.filter(p => (p.id !== id && p._id !== id)));
     };
 
     return (
@@ -223,8 +224,8 @@ export default function Dashboard() {
                                                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-white/10">
                                                     <span className="text-[10px] text-gray-400">{proj.year || '2026'}</span>
                                                     <button
-                                                        onClick={() => handleDeleteProject(proj.id)}
-                                                        className="text-xs text-red-500 hover:text-red-700"
+                                                        onClick={() => handleDeleteProject(proj._id || proj.id)}
+                                                        className="text-xs text-red-500 hover:text-red-700 font-medium"
                                                     >
                                                         Delete
                                                     </button>
@@ -302,7 +303,7 @@ export default function Dashboard() {
                                                 )}
                                             </div>
                                             <button
-                                                onClick={() => handleDeleteProject(proj.id)}
+                                                onClick={() => handleDeleteProject(proj._id || proj.id)}
                                                 className="text-xs text-red-500 hover:text-red-700 font-medium"
                                             >
                                                 Delete
