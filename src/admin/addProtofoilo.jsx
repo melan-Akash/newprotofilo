@@ -82,42 +82,48 @@ export default function AddPortfolio({ onProjectAdded }) {
                 createdAt: new Date().toISOString()
             };
 
-            // 1. Try sending multipart/form-data to server
-            try {
-                const formData = new FormData();
-                formData.append('name', name);
-                formData.append('description', description);
-                formData.append('overview', overview);
-                formData.append('tech', tech);
-                formData.append('year', year);
-                formData.append('github', github);
-                formData.append('live', live);
+            // 1. Send multipart/form-data to server for Cloudinary & MongoDB saving
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', description);
+            formData.append('overview', overview);
+            formData.append('tech', tech);
+            formData.append('year', year);
+            formData.append('github', github);
+            formData.append('live', live);
 
-                // Add images as JSON string for base64 / URL fallbacks
-                formData.append('images', JSON.stringify(finalImages));
+            // Add images as JSON string for base64 / URL fallbacks
+            formData.append('images', JSON.stringify(finalImages));
 
-                // Append any actual File objects
-                imageFiles.forEach((file) => {
-                    if (file) {
-                        formData.append('imageFiles', file);
-                    }
-                });
+            // Append any actual File objects
+            imageFiles.forEach((file) => {
+                if (file) {
+                    formData.append('imageFiles', file);
+                }
+            });
 
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                await fetch(`${apiUrl}/projects`, {
-                    method: 'POST',
-                    body: formData
-                });
-            } catch {
-                // If server is unreachable, continue with localStorage
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const res = await fetch(`${apiUrl}/projects`, {
+                method: 'POST',
+                body: formData
+            }).then(r => r.json());
+
+            if (!res || !res.success) {
+                throw new Error(res?.message || 'Server failed to save project.');
             }
 
-            // 2. Always persist locally in localStorage so it works everywhere
-            const existingLocal = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
-            existingLocal.unshift(newProjectData);
-            localStorage.setItem('melan_custom_projects', JSON.stringify(existingLocal));
+            const savedProject = res.project || newProjectData;
 
-            setSuccessMsg(`Project "${name}" added successfully!`);
+            // 2. Safely sync locally without crashing on quota limits
+            try {
+                const existingLocal = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
+                existingLocal.unshift(savedProject);
+                localStorage.setItem('melan_custom_projects', JSON.stringify(existingLocal));
+            } catch (storageErr) {
+                console.warn('LocalStorage quota reached, project safely stored in MongoDB Atlas:', storageErr);
+            }
+
+            setSuccessMsg(`Project "${name}" added successfully to MongoDB Atlas & Cloudinary!`);
 
             // Reset form
             setName('');
@@ -130,10 +136,10 @@ export default function AddPortfolio({ onProjectAdded }) {
             setImageFiles([null, null, null, null]);
 
             if (onProjectAdded) {
-                onProjectAdded(newProjectData);
+                onProjectAdded(savedProject);
             }
-        } catch {
-            setErrorMsg('Failed to save project. Please try again.');
+        } catch (err) {
+            setErrorMsg(err.message || 'Failed to save project. Please try again.');
         } finally {
             setLoading(false);
         }
