@@ -4,6 +4,7 @@ import Slidebar from './slidebar';
 import AddPortfolio from './addProtofoilo';
 import EmailInbox from './email';
 import ProfileSetting from './profileSetting';
+import EditProjectModal from './editProjectModal';
 import { getAuthHeaders } from '../utils/auth';
 
 export default function Dashboard() {
@@ -14,6 +15,8 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [syncingGitHub, setSyncingGitHub] = useState(false);
     const [syncMsg, setSyncMsg] = useState('');
+    const [editingProject, setEditingProject] = useState(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
     // Verify authentication with backend
     useEffect(() => {
@@ -105,6 +108,25 @@ export default function Dashboard() {
         }
 
         setProjects(prev => prev.filter(p => (p.id !== id && p._id !== id)));
+    };
+
+    const handleOpenEdit = (proj) => {
+        setEditingProject(proj);
+        setIsEditOpen(true);
+    };
+
+    const handleCloseEdit = () => {
+        setEditingProject(null);
+        setIsEditOpen(false);
+    };
+
+    const handleProjectUpdated = (updatedProj) => {
+        setProjects(prev => prev.map(p => {
+            const matches = (p._id && updatedProj._id && p._id === updatedProj._id)
+                || (p.id && updatedProj.id && p.id === updatedProj.id)
+                || (p.name && updatedProj.name && p.name === updatedProj.name);
+            return matches ? { ...p, ...updatedProj } : p;
+        }));
     };
 
     const handleSyncGitHub = async () => {
@@ -278,12 +300,20 @@ export default function Dashboard() {
                                                 </div>
                                                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-white/10">
                                                     <span className="text-[10px] text-gray-400">{proj.year || '2026'}</span>
-                                                    <button
-                                                        onClick={() => handleDeleteProject(proj._id || proj.id)}
-                                                        className="text-xs text-red-500 hover:text-red-700 font-medium"
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleOpenEdit(proj)}
+                                                            className="text-xs text-sky-500 hover:text-sky-700 font-medium"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteProject(proj._id || proj.id)}
+                                                            className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -374,12 +404,24 @@ export default function Dashboard() {
                                                     </a>
                                                 )}
                                             </div>
-                                            <button
-                                                onClick={() => handleDeleteProject(proj._id || proj.id)}
-                                                className="text-xs text-red-500 hover:text-red-700 font-medium"
-                                            >
-                                                Delete
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleOpenEdit(proj)}
+                                                    className="px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-500/20 text-xs font-semibold flex items-center gap-1 transition"
+                                                    title="Edit Project Details & Images"
+                                                >
+                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteProject(proj._id || proj.id)}
+                                                    className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-500/10 transition"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -396,6 +438,14 @@ export default function Dashboard() {
                     )}
                 </main>
             </div>
+
+            {/* Edit Project Modal */}
+            <EditProjectModal
+                project={editingProject}
+                isOpen={isEditOpen}
+                onClose={handleCloseEdit}
+                onProjectUpdated={handleProjectUpdated}
+            />
         </div>
     );
 }
