@@ -103,6 +103,7 @@ export default function Work() {
     const [projects, setProjects] = useState(initialProjects);
     const [selectedProject, setSelectedProject] = useState(null);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
+    const [visibleCount, setVisibleCount] = useState(12);
 
     // Fetch projects from server or localStorage
     useEffect(() => {
@@ -162,7 +163,7 @@ export default function Work() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 gap-6">
-                {projects.map((project) => (
+                {projects.slice(0, visibleCount).map((project) => (
                     <div
                         key={project._id || project.id || project.name}
                         onClick={() => openModal(project)}
@@ -209,6 +210,40 @@ export default function Work() {
                     </div>
                 ))}
             </div>
+
+            {/* More Works / Show Less Toggle Button */}
+            {projects.length > 12 && (
+                <div className="flex justify-center mb-12">
+                    {visibleCount < projects.length ? (
+                        <button
+                            onClick={() => setVisibleCount(projects.length)}
+                            className="w-max flex items-center justify-center gap-3 text-gray-800 dark:text-white border border-gray-400 dark:border-white/30 rounded-full py-3.5 px-8 sm:px-10 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black duration-300 shadow-sm hover:shadow-lg transition-all active:scale-95 group font-medium text-sm"
+                        >
+                            <span>More Works</span>
+                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-semibold border border-sky-500/20 group-hover:border-transparent">
+                                +{projects.length - visibleCount}
+                            </span>
+                            <svg className="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                setVisibleCount(12);
+                                const workEl = document.getElementById('work');
+                                if (workEl) workEl.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="w-max flex items-center justify-center gap-2 text-gray-800 dark:text-white border border-gray-400 dark:border-white/30 rounded-full py-3.5 px-8 sm:px-10 hover:bg-gray-100 dark:hover:bg-white/10 duration-300 shadow-sm transition-all active:scale-95 group font-medium text-sm"
+                        >
+                            <span>Show Less</span>
+                            <svg className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Catamaran Surf Club - special mention */}
             <div className="max-w-4xl mx-auto border border-gray-300 dark:border-white/20 rounded-xl p-6 sm:p-8 hover:bg-lightHover dark:hover:bg-darkHover/50 transition-colors duration-300 dark:text-white">

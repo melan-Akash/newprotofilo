@@ -35,17 +35,17 @@ function MainPortfolio() {
 function ProtectedAdmin({ children }) {
     const authData = localStorage.getItem('melan_admin_auth');
     if (!authData) {
-        return <Navigate to="/admin/login" replace />;
+        return <Navigate to="/cms-login" replace />;
     }
     try {
         const parsed = JSON.parse(authData);
         if (!parsed || !parsed.token) {
             localStorage.removeItem('melan_admin_auth');
-            return <Navigate to="/admin/login" replace />;
+            return <Navigate to="/cms-login" replace />;
         }
     } catch {
         localStorage.removeItem('melan_admin_auth');
-        return <Navigate to="/admin/login" replace />;
+        return <Navigate to="/cms-login" replace />;
     }
     return children;
 }
@@ -58,8 +58,9 @@ export default function App() {
                     {/* Client Portfolio */}
                     <Route path="/" element={<MainPortfolio />} />
 
-                    {/* Admin Login Route */}
-                    <Route path="/admin/login" element={<Login />} />
+                    {/* CMS Admin Login Route */}
+                    <Route path="/cms-login" element={<Login />} />
+                    <Route path="/admin/login" element={<Navigate to="/cms-login" replace />} />
 
                     {/* Protected Admin Routes */}
                     <Route

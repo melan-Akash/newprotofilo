@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import navLogoLight from '../assests/logo_for_navbar_lightmood.png';
 import navLogoDark from '../assests/logo_for_navbar_darkmood.png';
@@ -9,6 +9,20 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const authData = localStorage.getItem('melan_admin_auth');
+        if (authData) {
+            try {
+                const parsed = JSON.parse(authData);
+                if (parsed?.token) {
+                    navigate('/admin', { replace: true });
+                }
+            } catch {
+                localStorage.removeItem('melan_admin_auth');
+            }
+        }
+    }, [navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
