@@ -65,6 +65,53 @@ export default function EmailInbox() {
         }
     };
 
+    const [replyModal, setReplyModal] = useState(null); // active message to reply to
+    const [replyText, setReplyText] = useState("");
+    const [replySubject, setReplySubject] = useState("");
+    const [sendingReply, setSendingReply] = useState(false);
+
+    const openReplyModal = (item) => {
+        setReplyModal(item);
+        setReplySubject(`Re: Inquiry from ${item.name} - Melan Akash Portfolio`);
+        setReplyText(`Hi ${item.name},\n\nThank you for reaching out! I would love to connect with you regarding this.\n\nBest regards,\nMelan Akash`);
+    };
+
+    const handleSendReply = async (e) => {
+        e.preventDefault();
+        if (!replyText.trim() || !replyModal) return;
+
+        setSendingReply(true);
+        const toastId = toast.loading("Sending email reply...");
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+        try {
+            const res = await fetch(`${apiUrl}/messages/reply`, {
+                method: 'POST',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    to: replyModal.email,
+                    subject: replySubject,
+                    replyText: replyText.trim(),
+                    originalMessage: replyModal.message
+                })
+            }).then(r => r.json());
+
+            if (res && res.success) {
+                toast.success(`Reply sent to ${replyModal.email}!`, { id: toastId });
+                setReplyModal(null);
+            } else {
+                toast.error(res?.message || "Failed to send email. Check backend settings.", { id: toastId });
+            }
+        } catch (err) {
+            toast.error("Network error while sending email reply.", { id: toastId });
+        } finally {
+            setSendingReply(false);
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto font-Outfit">
             <div className="flex items-center justify-between mb-8">
@@ -122,16 +169,88 @@ export default function EmailInbox() {
                             <p className="text-sm text-gray-600 dark:text-white/70 leading-relaxed bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-100 dark:border-white/5">
                                 {item.message}
                             </p>
-                            <div className="mt-4 flex justify-end">
+                            <div className="mt-4 flex items-center justify-end gap-2.5">
                                 <a
                                     href={`mailto:${item.email}?subject=Re: Portfolio Inquiry`}
-                                    className="px-4 py-1.5 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition"
+                                    className="px-3.5 py-1.5 rounded-lg border border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 text-xs font-medium hover:bg-gray-100 dark:hover:bg-white/10 transition"
                                 >
-                                    Reply via Email →
+                                    Open Email App ↗
                                 </a>
+                                <button
+                                    onClick={() => openReplyModal(item)}
+                                    className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-medium hover:from-sky-600 hover:to-blue-700 transition shadow-sm"
+                                >
+                                    Direct Reply →
+                                </button>
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Quick Reply Modal */}
+            {replyModal && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[#0c182d] border border-gray-200 dark:border-white/15 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+                        <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-3">
+                            <div>
+                                <h3 className="font-bold text-base text-gray-900 dark:text-white">Reply to {replyModal.name}</h3>
+                                <p className="text-xs text-gray-500 dark:text-white/60">{replyModal.email}</p>
+                            </div>
+                            <button
+                                onClick={() => setReplyModal(null)}
+                                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 hover:bg-gray-200 flex items-center justify-center"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSendReply} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 dark:text-white/80 mb-1">Subject</label>
+                                <input
+                                    type="text"
+                                    value={replySubject}
+                                    onChange={(e) => setReplySubject(e.target.value)}
+                                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-300 dark:border-white/20 bg-white dark:bg-darkHover/40 outline-none focus:ring-2 focus:ring-sky-500/30"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 dark:text-white/80 mb-1">Reply Message</label>
+                                <textarea
+                                    rows="6"
+                                    value={replyText}
+                                    onChange={(e) => setReplyText(e.target.value)}
+                                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 dark:border-white/20 bg-white dark:bg-darkHover/40 outline-none focus:ring-2 focus:ring-sky-500/30 font-Outfit leading-relaxed"
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 text-[11px] text-gray-500 dark:text-white/60 max-h-20 overflow-y-auto">
+                                <span className="font-semibold text-gray-700 dark:text-white/80">Original Message: </span>
+                                {replyModal.message}
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2.5 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setReplyModal(null)}
+                                    className="px-4 py-2 rounded-full border border-gray-300 dark:border-white/20 text-xs font-medium text-gray-600 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/10"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={sendingReply}
+                                    className="px-6 py-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-semibold shadow-md shadow-sky-500/25 disabled:opacity-60"
+                                >
+                                    {sendingReply ? 'Sending...' : 'Send Email Reply →'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

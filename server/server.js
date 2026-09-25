@@ -148,14 +148,15 @@ export const upload = multer({
 // 3. Connect to MongoDB Atlas
 connectDB();
 
-// 4. Nodemailer Setup
+// 4. Nodemailer Setup (Using Gmail Service preset with TLS for maximum cloud reliability)
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
+    service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
@@ -444,35 +445,107 @@ app.post('/api/messages', rateLimiter(10 * 60 * 1000, 5, 'Message limit reached.
             fs.writeFileSync(LOCAL_MESSAGES_FILE, JSON.stringify(current, null, 2));
         }
 
-        // Send Email notification with XSS protection via HTML escaping
+        // Send Email notification with XSS protection via HTML escaping (Awaited for Vercel Serverless)
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
             const escapedName = escapeHtml(cleanName);
             const escapedEmail = escapeHtml(cleanEmail);
             const escapedMessage = escapeHtml(cleanMessage).replace(/\n/g, '<br/>');
 
-            transporter.sendMail({
-                from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
-                to: process.env.EMAIL_USER,
-                replyTo: cleanEmail,
-                subject: `🚀 New Portfolio Message from ${escapedName}`,
-                html: `
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px;">
-                        <h2 style="color: #0284c7; margin-top: 0;">New Portfolio Inquiry</h2>
-                        <p style="margin: 8px 0;"><strong>Name:</strong> ${escapedName}</p>
-                        <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${escapedEmail}" style="color: #0284c7;">${escapedEmail}</a></p>
-                        <p style="margin: 8px 0;"><strong>Message:</strong></p>
-                        <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; line-height: 1.6; margin-top: 8px;">
-                            ${escapedMessage}
+            try {
+                await transporter.sendMail({
+                    from: `"Melan Akash Portfolio" <${process.env.EMAIL_USER}>`,
+                    to: process.env.EMAIL_USER,
+                    replyTo: cleanEmail,
+                    subject: `🚀 New Portfolio Inquiry from ${escapedName}`,
+                    html: `
+                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 28px; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <h2 style="color: #0284c7; margin: 0; font-size: 22px;">New Client Inquiry</h2>
+                                <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Submitted via melanakash.dev contact form</p>
+                            </div>
+                            <div style="background-color: #f8fafc; border-radius: 12px; padding: 18px; border: 1px solid #f1f5f9; margin-bottom: 20px;">
+                                <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Sender Name:</strong> ${escapedName}</p>
+                                <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Sender Email:</strong> <a href="mailto:${escapedEmail}" style="color: #0284c7; text-decoration: none;">${escapedEmail}</a></p>
+                                <p style="margin: 0; font-size: 14px;"><strong>Received:</strong> ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' })} (LK Time)</p>
+                            </div>
+                            <div style="margin-bottom: 24px;">
+                                <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #475569;">Message Content:</p>
+                                <div style="background: #ffffff; padding: 16px; border-radius: 10px; border-left: 4px solid #0284c7; line-height: 1.6; font-size: 14px; color: #334155; border: 1px solid #e2e8f0;">
+                                    ${escapedMessage}
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 24px;">
+                                <a href="mailto:${escapedEmail}?subject=Re: Your Inquiry on Melan Akash Portfolio" style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; padding: 11px 26px; border-radius: 50px; font-size: 14px; font-weight: 600;">
+                                    Reply to ${escapedName} →
+                                </a>
+                            </div>
+                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 26px 0 14px 0;" />
+                            <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">Melan Akash Portfolio Automated Notification</p>
                         </div>
-                        <p style="font-size: 12px; color: #94a3b8; margin-top: 24px;">Sent from Melan Akash Portfolio Website</p>
-                    </div>
-                `
-            }).catch(e => console.warn('Email dispatch warning:', e.message));
+                    `
+                });
+                console.log(`Email successfully dispatched for ${cleanName}`);
+            } catch (mailErr) {
+                console.error('Email dispatch error:', mailErr.message);
+            }
         }
 
         res.status(201).json({ success: true, message: savedMsg });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Admin Direct Email Reply Endpoint (Protected by verifyAdmin)
+app.post('/api/messages/reply', verifyAdmin, async (req, res) => {
+    try {
+        const { to, subject, replyText, originalMessage } = req.body;
+
+        if (!to || !replyText) {
+            return res.status(400).json({ success: false, message: 'Recipient email and reply text are required.' });
+        }
+
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            return res.status(500).json({ success: false, message: 'Backend email credentials not configured in environment.' });
+        }
+
+        const escapedReply = escapeHtml(replyText).replace(/\n/g, '<br/>');
+        const escapedOrig = originalMessage ? escapeHtml(originalMessage).replace(/\n/g, '<br/>') : '';
+
+        await transporter.sendMail({
+            from: `"Melan Akash" <${process.env.EMAIL_USER}>`,
+            to: to.trim(),
+            replyTo: process.env.EMAIL_USER,
+            subject: subject || 'Re: Your Inquiry on Melan Akash Portfolio',
+            html: `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 28px; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+                    <div style="margin-bottom: 20px;">
+                        <h2 style="color: #0284c7; margin: 0; font-size: 20px;">Melan Akash</h2>
+                        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Associate Software Engineer &amp; Full Stack Developer</p>
+                    </div>
+                    <div style="line-height: 1.7; font-size: 15px; color: #334155; margin-bottom: 24px;">
+                        ${escapedReply}
+                    </div>
+                    ${escapedOrig ? `
+                        <div style="background-color: #f8fafc; border-radius: 10px; padding: 14px; border-left: 3px solid #94a3b8; font-size: 13px; color: #64748b; margin-top: 20px;">
+                            <strong>In reference to your message:</strong><br/>
+                            ${escapedOrig}
+                        </div>
+                    ` : ''}
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 26px 0 14px 0;" />
+                    <p style="font-size: 12px; color: #94a3b8; margin: 0;">
+                        Best regards,<br/>
+                        <strong>Melan Akash</strong><br/>
+                        Email: <a href="mailto:${process.env.EMAIL_USER}" style="color: #0284c7;">${process.env.EMAIL_USER}</a> | Matara, Sri Lanka
+                    </p>
+                </div>
+            `
+        });
+
+        res.json({ success: true, message: `Email reply successfully sent to ${to}` });
+    } catch (err) {
+        console.error('Reply email error:', err.message);
+        res.status(500).json({ success: false, message: `Failed to send email: ${err.message}` });
     }
 });
 
