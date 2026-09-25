@@ -13,6 +13,7 @@ import Education from './components/Education';
 
 import Login from './admin/login';
 import Dashboard from './admin/dashbord';
+import ProjectDetails from './pages/ProjectDetails';
 
 function MainPortfolio() {
     return (
@@ -57,6 +58,9 @@ export default function App() {
                 <Routes>
                     {/* Client Portfolio */}
                     <Route path="/" element={<MainPortfolio />} />
+
+                    {/* Dedicated Project Details Page */}
+                    <Route path="/project/:id" element={<ProjectDetails />} />
 
                     {/* CMS Admin Login Route */}
                     <Route path="/cmsdash-login" element={<Login />} />
