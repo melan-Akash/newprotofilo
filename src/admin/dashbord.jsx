@@ -22,14 +22,14 @@ export default function Dashboard() {
     useEffect(() => {
         const authData = localStorage.getItem('melan_admin_auth');
         if (!authData) {
-            navigate('/cms-login', { replace: true });
+            navigate('/cmsdash-login', { replace: true });
             return;
         }
         try {
             const parsed = JSON.parse(authData);
             if (!parsed?.token) {
                 localStorage.removeItem('melan_admin_auth');
-                navigate('/cms-login', { replace: true });
+                navigate('/cmsdash-login', { replace: true });
                 return;
             }
 
@@ -45,13 +45,13 @@ export default function Dashboard() {
             .then(res => {
                 if (!res || !res.success) {
                     localStorage.removeItem('melan_admin_auth');
-                    navigate('/cms-login', { replace: true });
+                    navigate('/cmsdash-login', { replace: true });
                 }
             })
             .catch(() => {});
         } catch {
             localStorage.removeItem('melan_admin_auth');
-            navigate('/cms-login', { replace: true });
+            navigate('/cmsdash-login', { replace: true });
         }
     }, [navigate]);
 
@@ -84,7 +84,7 @@ export default function Dashboard() {
 
     const handleLogout = () => {
         localStorage.removeItem('melan_admin_auth');
-        navigate('/cms-login');
+        navigate('/cmsdash-login');
     };
 
     const handleDeleteProject = async (id) => {
