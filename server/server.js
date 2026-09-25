@@ -202,6 +202,21 @@ function saveLocalProfile(data) {
 
 // ---------------- API ENDPOINTS ----------------
 
+// Root API Landing
+app.get('/', (req, res) => {
+    res.json({
+        success: true,
+        message: '🚀 Melan Akash Portfolio Backend API is Running Live!',
+        status: 'online',
+        endpoints: {
+            health: '/api/health',
+            projects: '/api/projects',
+            profile: '/api/profile',
+            sitemap: '/api/sitemap.xml'
+        }
+    });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({
