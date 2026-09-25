@@ -202,6 +202,9 @@ function saveLocalProfile(data) {
 
 // ---------------- API ENDPOINTS ----------------
 
+// Suppress browser favicon request for raw API endpoints
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // Root API Landing
 app.get('/', (req, res) => {
     res.json({
