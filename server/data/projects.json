@@ -1,0 +1,74 @@
+[
+  {
+    "id": "p1",
+    "name": "FindDine",
+    "description": "Restaurant Booking AI Platform",
+    "overview": "An intelligent AI-powered restaurant reservation and table management platform. Features smart table recommendation, real-time availability tracking, dynamic reviews, and integrated digital ordering.",
+    "tech": "MERN · TypeScript · AI",
+    "year": "2026",
+    "github": "https://github.com/melan-Akash/Find_Dine_Restaurant",
+    "live": "https://find-dine.vercel.app",
+    "images": [
+      "https://res.cloudinary.com/dc23tp2he/image/upload/v1790313346/melan_portfolio/d3z5vodmnkkcqbsbnbcp.png",
+      "https://res.cloudinary.com/dc23tp2he/image/upload/v1790313350/melan_portfolio/sbizfhtq8ewrabse4eyh.png",
+      "https://res.cloudinary.com/dc23tp2he/image/upload/v1790313352/melan_portfolio/qonxx8powbva8ton0pbq.png",
+      "https://res.cloudinary.com/dc23tp2he/image/upload/v1790313355/melan_portfolio/lrjpmcfcff7bur2ktu4h.png"
+    ],
+    "image": "https://res.cloudinary.com/dc23tp2he/image/upload/v1790313346/melan_portfolio/d3z5vodmnkkcqbsbnbcp.png",
+    "createdAt": "2026-09-21T14:15:47.241Z"
+  },
+  {
+    "id": "p2",
+    "name": "AI Website Builder",
+    "description": "NL-to-React Code Generator",
+    "overview": "Empowers users to build fully interactive websites through natural language prompts. Utilizes LLM streaming and in-browser Sandpack virtual containers for instant live code execution.",
+    "tech": "MERN · OpenRouter · Sandpack",
+    "year": "2026",
+    "github": "https://github.com/melan-Akash/AI_Site_Bulder_Full_Stack",
+    "live": "https://site-bulder.vercel.app",
+    "images": [
+      "./assets/work-2.png",
+      "./assets/work-2.png",
+      "./assets/work-2.png",
+      "./assets/work-2.png"
+    ],
+    "image": "./assets/work-2.png",
+    "createdAt": "2026-09-21T14:15:47.241Z"
+  },
+  {
+    "id": "p3",
+    "name": "Meetup",
+    "description": "AI Video Conferencing App",
+    "overview": "Full-stack enterprise-grade video meeting suite built with WebRTC mesh architecture, real-time screen sharing, dynamic breakout rooms, interactive whiteboards, and live audio transcription.",
+    "tech": "PERN · WebRTC · Socket.io",
+    "year": "2026",
+    "github": "https://github.com/melan-Akash/Meetup_FullStackVideoMeetingApp_PERN-Stack",
+    "live": "https://meetup-ten-lemon.vercel.app",
+    "images": [
+      "./assets/work-3.png",
+      "./assets/work-3.png",
+      "./assets/work-3.png",
+      "./assets/work-3.png"
+    ],
+    "image": "./assets/work-3.png",
+    "createdAt": "2026-09-21T14:15:47.241Z"
+  },
+  {
+    "id": "p4",
+    "name": "MelanCart",
+    "description": "AI Grocery E-Commerce & Logistics",
+    "overview": "Next-generation hyper-local grocery shopping portal featuring conversational AI voice search, instant item matching, real-time driver GPS tracking, and automated stock alerts.",
+    "tech": "MERN · AI Voice · GPS Tracking",
+    "year": "2026",
+    "github": "https://github.com/melan-Akash/Glosary-Full-Stack",
+    "live": "",
+    "images": [
+      "./assets/work-4.png",
+      "./assets/work-4.png",
+      "./assets/work-4.png",
+      "./assets/work-4.png"
+    ],
+    "image": "./assets/work-4.png",
+    "createdAt": "2026-09-21T14:15:47.241Z"
+  }
+]
