@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getAuthHeaders } from '../utils/auth';
 
 export default function AddPortfolio({ onProjectAdded }) {
     const [name, setName] = useState('');
@@ -107,6 +108,7 @@ export default function AddPortfolio({ onProjectAdded }) {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const response = await fetch(`${apiUrl}/projects`, {
                 method: 'POST',
+                headers: getAuthHeaders(),
                 body: formData
             });
 
