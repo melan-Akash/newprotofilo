@@ -22,15 +22,6 @@ export default function Header() {
                     animate={{ y: [0, -6, 0] }}
                     transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
                 />
-                <motion.div
-                    className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 border-2 border-white dark:border-[#060d1a] rounded-full flex items-center justify-center text-[10px] text-white shadow-md"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.4 }}
-                    title="Available for Opportunities"
-                >
-                    ●
-                </motion.div>
             </motion.div>
 
             {/* Greeting */}
