@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getAuthHeaders } from '../utils/auth';
 
 export default function EmailInbox() {
     const [messages, setMessages] = useState([]);
@@ -25,7 +26,9 @@ export default function EmailInbox() {
         const fetchMessages = async () => {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             try {
-                const res = await fetch(`${apiUrl}/messages`).then(r => r.json());
+                const res = await fetch(`${apiUrl}/messages`, {
+                    headers: getAuthHeaders()
+                }).then(r => r.json());
                 if (res && res.success && res.messages && res.messages.length > 0) {
                     setMessages(res.messages);
                 } else {
@@ -43,10 +46,21 @@ export default function EmailInbox() {
         fetchMessages();
     }, []);
 
-    const handleDelete = (id) => {
-        const updated = messages.filter(m => m.id !== id);
+    const handleDelete = async (id) => {
+        if (!id) return;
+        const updated = messages.filter(m => (m.id !== id && m._id !== id));
         setMessages(updated);
         localStorage.setItem('melan_contact_messages', JSON.stringify(updated));
+
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            await fetch(`${apiUrl}/messages/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+        } catch {
+            // Ignore server network errors
+        }
     };
 
     return (
@@ -73,7 +87,7 @@ export default function EmailInbox() {
                 <div className="space-y-4">
                     {messages.map((item) => (
                         <div
-                            key={item.id}
+                            key={item._id || item.id}
                             className="bg-white dark:bg-[#0c182d] border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
                         >
                             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -95,7 +109,7 @@ export default function EmailInbox() {
                                         })}
                                     </span>
                                     <button
-                                        onClick={() => handleDelete(item.id)}
+                                        onClick={() => handleDelete(item._id || item.id)}
                                         className="text-xs text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-500/10"
                                         title="Delete Message"
                                     >

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getAuthHeaders } from '../utils/auth';
 
 const ProfileContext = createContext(null);
 
@@ -66,12 +67,13 @@ export function ProfileProvider({ children }) {
             if (data instanceof FormData) {
                 res = await fetch(`${API_URL}/profile`, {
                     method: 'POST',
+                    headers: getAuthHeaders(),
                     body: data
                 }).then(r => r.json());
             } else {
                 res = await fetch(`${API_URL}/profile`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify(data)
                 }).then(r => r.json());
             }

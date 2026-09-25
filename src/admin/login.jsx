@@ -85,7 +85,7 @@ export default function Login() {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-white/15 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm outline-none focus:border-sky-500 transition-colors"
-                            placeholder="e.g. pkaya or pkaya@gmail.com"
+                            placeholder="Enter username or email"
                             autoComplete="username"
                             required
                         />
@@ -100,7 +100,7 @@ export default function Login() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-white/15 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-sm outline-none focus:border-sky-500 transition-colors"
-                            placeholder="••••••••"
+                            placeholder="Enter password"
                             autoComplete="current-password"
                             required
                         />
