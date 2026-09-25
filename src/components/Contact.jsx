@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
 export default function Contact() {
     const [result, setResult] = useState("");
@@ -47,7 +48,7 @@ export default function Contact() {
             }
         } catch {
             toast.success("Message sent! Thank you for reaching out.", { id: toastId });
-            setResult("Message sent successfully!");
+            setResult("Message saved successfully!");
             event.target.reset();
         } finally {
             setSending(false);
@@ -95,30 +96,102 @@ export default function Contact() {
     useEffect(() => {
         CaptchaLoader();
     }, []);
+
     return (
         <div id="contact" className="w-full px-[12%] py-10 scroll-mt-20 bg-[url('./assets/footer-bg-color.png')] bg-no-repeat bg-[length:90%_auto] bg-center dark:bg-none">
+            <motion.h4
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-2 text-lg font-Ovo text-sky-600 dark:text-sky-400"
+            >
+                Connect with me
+            </motion.h4>
+            <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: 0.1 }}
+                className="text-center text-5xl font-Ovo"
+            >
+                Get in touch
+            </motion.h2>
+            <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: 0.2 }}
+                className="text-center max-w-2xl mx-auto mt-5 mb-12 font-Ovo text-gray-600 dark:text-white/80"
+            >
+                I&apos;d love to hear from you! If you have any questions, collaboration opportunities or feedback, please use the form below.
+            </motion.p>
 
-            <h4 className="text-center mb-2 text-lg font-Ovo">Connect with me</h4>
-            <h2 className="text-center text-5xl font-Ovo">Get in touch</h2>
-            <p className="text-center max-w-2xl mx-auto mt-5 mb-12 font-Ovo">I&apos;d love to hear from you! If you have any questions, comments or feedback, please use the form below.</p>
-
-            <form onSubmit={onSubmit} className="max-w-2xl mx-auto">
-
+            <motion.form
+                onSubmit={onSubmit}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.25 }}
+                className="max-w-2xl mx-auto"
+            >
                 <input type="hidden" name="subject" value="Melan Akash - New form Submission" />
 
                 <div className="grid grid-cols-auto gap-6 mt-10 mb-8">
-                    <input type="text" placeholder="Enter your name" className="flex-1 px-3 py-2 focus:ring-1 outline-none border border-gray-300 dark:border-white/30 rounded-md bg-white dark:bg-darkHover/30" required name="name" />
+                    <input
+                        type="text"
+                        placeholder="Enter your name"
+                        className="flex-1 px-4 py-3 focus:ring-2 focus:ring-sky-500/30 outline-none border border-gray-300 dark:border-white/30 rounded-xl bg-white dark:bg-darkHover/30 transition-all"
+                        required
+                        name="name"
+                    />
 
-                    <input type="email" placeholder="Enter your email" className="flex-1 px-3 py-2 focus:ring-1 outline-none border border-gray-300 dark:border-white/30 rounded-md bg-white dark:bg-darkHover/30" required name="email" />
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        className="flex-1 px-4 py-3 focus:ring-2 focus:ring-sky-500/30 outline-none border border-gray-300 dark:border-white/30 rounded-xl bg-white dark:bg-darkHover/30 transition-all"
+                        required
+                        name="email"
+                    />
                 </div>
-                <textarea rows="6" placeholder="Enter your message" className="w-full px-4 py-2 focus:ring-1 outline-none border border-gray-300 dark:border-white/30 rounded-md bg-white mb-6 dark:bg-darkHover/30" required name="message"></textarea>
+                <textarea
+                    rows="6"
+                    placeholder="Enter your message"
+                    className="w-full px-4 py-3 focus:ring-2 focus:ring-sky-500/30 outline-none border border-gray-300 dark:border-white/30 rounded-xl bg-white mb-6 dark:bg-darkHover/30 transition-all"
+                    required
+                    name="message"
+                ></textarea>
                 <div className="h-captcha mb-6 max-w-full" data-captcha="true"></div>
-                <button type='submit' className="py-2 px-8 w-max flex items-center justify-between gap-2 bg-black/80 text-white rounded-full mx-auto hover:bg-black duration-500 dark:bg-transparent dark:border dark:border-white/30 dark:hover:bg-darkHover">
-                Submit now
-                    <img src="./assets/right-arrow-white.png" alt="" className="w-4" />
-                </button>
-                <p className='mt-4'>{result}</p>
-            </form>
+
+                <div className="flex flex-col items-center">
+                    <motion.button
+                        type='submit'
+                        disabled={sending}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                        className="py-3 px-8 w-max flex items-center justify-between gap-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-full mx-auto shadow-lg shadow-sky-500/25 disabled:opacity-60 disabled:cursor-not-allowed font-medium text-sm transition-all"
+                    >
+                        <span>{sending ? 'Sending...' : 'Submit now'}</span>
+                        <motion.img
+                            src="./assets/right-arrow-white.png"
+                            alt=""
+                            className="w-4"
+                            animate={sending ? { rotate: 360 } : { x: [0, 4, 0] }}
+                            transition={sending ? { repeat: Infinity, duration: 1, ease: "linear" } : { repeat: Infinity, duration: 1.5 }}
+                        />
+                    </motion.button>
+                    {result && (
+                        <motion.p
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className='mt-4 text-sm text-center font-medium text-sky-600 dark:text-sky-400'
+                        >
+                            {result}
+                        </motion.p>
+                    )}
+                </div>
+            </motion.form>
         </div>
-    )
+    );
 }
