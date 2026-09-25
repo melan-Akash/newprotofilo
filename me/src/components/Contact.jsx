@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
 export default function Contact() {
     const [result, setResult] = useState("");
     const [sending, setSending] = useState(false);
+    const captchaRef = useRef(null);
 
     const onSubmit = async (event) => {
         event.preventDefault();
@@ -41,60 +42,64 @@ export default function Contact() {
                 toast.success("Message sent successfully! Thank you for reaching out.", { id: toastId });
                 setResult("Message sent successfully! Thank you for reaching out.");
                 event.target.reset();
+                if (window.hcaptcha) {
+                    try { window.hcaptcha.reset(); } catch {}
+                }
             } else {
                 toast.success("Message received! Thank you for contacting me.", { id: toastId });
                 setResult("Message saved successfully!");
                 event.target.reset();
+                if (window.hcaptcha) {
+                    try { window.hcaptcha.reset(); } catch {}
+                }
             }
         } catch {
             toast.success("Message sent! Thank you for reaching out.", { id: toastId });
             setResult("Message saved successfully!");
             event.target.reset();
+            if (window.hcaptcha) {
+                try { window.hcaptcha.reset(); } catch {}
+            }
         } finally {
             setSending(false);
         }
     };
 
-    function CaptchaLoader() {
-        const captchadiv = document.querySelectorAll('[data-captcha="true"]');
-        if (captchadiv.length) {
-            let lang = null;
-            let onload = null;
-            let render = null;
-
-            captchadiv.forEach(function (item) {
-                const sitekey = item.dataset.sitekey;
-                lang = item.dataset.lang;
-                onload = item.dataset.onload;
-                render = item.dataset.render;
-
-                if (!sitekey) {
-                    item.dataset.sitekey = "50b2fe65-b00b-4b9e-ad62-3ba471098be2";
-                }
-            });
-
-            let scriptSrc = "https://js.hcaptcha.com/1/api.js?recaptchacompat=off";
-            if (lang) {
-                scriptSrc += `&hl=${lang}`;
-            }
-            if (onload) {
-                scriptSrc += `&onload=${onload}`;
-            }
-            if (render) {
-                scriptSrc += `&render=${render}`;
-            }
-
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.async = true;
-            script.defer = true;
-            script.src = scriptSrc;
-            document.body.appendChild(script);
-        }
-    }
-
     useEffect(() => {
-        CaptchaLoader();
+        const sitekey = "50b2fe65-b00b-4b9e-ad62-3ba471098be2";
+
+        const renderCaptcha = () => {
+            if (window.hcaptcha && captchaRef.current) {
+                try {
+                    // Check if already rendered to prevent duplicate boxes
+                    if (!captchaRef.current.querySelector('iframe')) {
+                        window.hcaptcha.render(captchaRef.current, {
+                            sitekey: sitekey,
+                            theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+                        });
+                    }
+                } catch {
+                    // Fallback to auto-render
+                }
+            }
+        };
+
+        if (window.hcaptcha) {
+            renderCaptcha();
+        } else {
+            window.onHcaptchaLoaded = () => {
+                renderCaptcha();
+            };
+
+            if (!document.querySelector('script[src*="hcaptcha.com"]')) {
+                const script = document.createElement("script");
+                script.type = "text/javascript";
+                script.async = true;
+                script.defer = true;
+                script.src = "https://js.hcaptcha.com/1/api.js?onload=onHcaptchaLoaded&render=explicit";
+                document.body.appendChild(script);
+            }
+        }
     }, []);
 
     return (
@@ -161,7 +166,13 @@ export default function Contact() {
                     required
                     name="message"
                 ></textarea>
-                <div className="h-captcha mb-6 max-w-full" data-captcha="true"></div>
+
+                <div
+                    ref={captchaRef}
+                    className="h-captcha mb-6 flex justify-center min-h-[78px]"
+                    data-sitekey="50b2fe65-b00b-4b9e-ad62-3ba471098be2"
+                    data-captcha="true"
+                ></div>
 
                 <div className="flex flex-col items-center">
                     <motion.button
