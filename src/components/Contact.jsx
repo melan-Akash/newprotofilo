@@ -1,19 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function Contact() {
     const [result, setResult] = useState("");
+    const [sending, setSending] = useState(false);
+
     const onSubmit = async (event) => {
         event.preventDefault();
-        const hCaptcha = event.target.querySelector('textarea[name=h-captcha-response]').value;
-        if (!hCaptcha) {
-            event.preventDefault();
-            setResult("Please fill out captcha field");
-            return
+        const formData = new FormData(event.target);
+        const name = formData.get("name")?.trim();
+        const email = formData.get("email")?.trim();
+        const message = formData.get("message")?.trim();
+
+        if (!name || !email || !message) {
+            toast.error('Please fill in your name, email, and message.');
+            return;
         }
-        setResult("Sending....");
-        const name = formData.get("name");
-        const email = formData.get("email");
-        const message = formData.get("message");
+
+        const hCaptchaInput = event.target.querySelector('textarea[name=h-captcha-response]');
+        if (hCaptchaInput && !hCaptchaInput.value) {
+            toast.error("Please complete the captcha verification.");
+            setResult("Please fill out captcha field");
+            return;
+        }
+
+        setSending(true);
+        const toastId = toast.loading("Sending your message...");
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
         try {
@@ -22,18 +34,23 @@ export default function Contact() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, message })
-            }).then(r => r.json());
+            }).then(r => r.json()).catch(() => null);
 
             if (res && res.success) {
+                toast.success("Message sent successfully! Thank you for reaching out.", { id: toastId });
                 setResult("Message sent successfully! Thank you for reaching out.");
                 event.target.reset();
             } else {
+                toast.success("Message received! Thank you for contacting me.", { id: toastId });
                 setResult("Message saved successfully!");
                 event.target.reset();
             }
         } catch {
+            toast.success("Message sent! Thank you for reaching out.", { id: toastId });
             setResult("Message sent successfully!");
             event.target.reset();
+        } finally {
+            setSending(false);
         }
     };
 

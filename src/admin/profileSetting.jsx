@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useProfile } from '../context/ProfileContext';
 
 export default function ProfileSetting() {
@@ -55,6 +56,7 @@ export default function ProfileSetting() {
         e.preventDefault();
         setSaving(true);
         setStatusMsg({ type: '', text: '' });
+        const toastId = toast.loading('Saving profile changes & uploading avatar...');
 
         try {
             const formData = new FormData();
@@ -78,12 +80,18 @@ export default function ProfileSetting() {
 
             const res = await updateProfile(formData);
             if (res && res.success) {
-                setStatusMsg({ type: 'success', text: 'Profile updated and saved to MongoDB Atlas & Cloudinary successfully!' });
+                const successText = 'Profile updated and saved to MongoDB Atlas & Cloudinary successfully!';
+                setStatusMsg({ type: 'success', text: successText });
+                toast.success('Profile updated successfully!', { id: toastId });
             } else {
-                setStatusMsg({ type: 'error', text: res?.error || 'Failed to update profile.' });
+                const errorText = res?.error || 'Failed to update profile.';
+                setStatusMsg({ type: 'error', text: errorText });
+                toast.error(errorText, { id: toastId });
             }
         } catch (err) {
-            setStatusMsg({ type: 'error', text: err.message || 'An error occurred.' });
+            const errorText = err.message || 'An error occurred.';
+            setStatusMsg({ type: 'error', text: errorText });
+            toast.error(errorText, { id: toastId });
         } finally {
             setSaving(false);
         }

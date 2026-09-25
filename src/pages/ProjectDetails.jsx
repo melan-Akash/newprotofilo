@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { getAllProjects, getProjectSlug } from '../data/projectsData';
 import { useProfile } from '../context/ProfileContext';
 import defaultProfileImg from '../assests/melanakash.png';
@@ -56,6 +57,7 @@ export default function ProjectDetails() {
     const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href);
         setCopied(true);
+        toast.success('Project link copied to clipboard!');
         setTimeout(() => setCopied(false), 2500);
     };
 

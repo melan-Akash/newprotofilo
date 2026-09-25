@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { getAuthHeaders } from '../utils/auth';
 
 export default function EmailInbox() {
@@ -51,6 +52,7 @@ export default function EmailInbox() {
         const updated = messages.filter(m => (m.id !== id && m._id !== id));
         setMessages(updated);
         localStorage.setItem('melan_contact_messages', JSON.stringify(updated));
+        toast.success('Inquiry deleted.');
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';

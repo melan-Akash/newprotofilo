@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { getAuthHeaders } from '../utils/auth';
 
 export default function EditProjectModal({ project, isOpen, onClose, onProjectUpdated }) {
@@ -80,10 +81,12 @@ export default function EditProjectModal({ project, isOpen, onClose, onProjectUp
 
         if (!name.trim()) {
             setErrorMsg('Project name is required');
+            toast.error('Project name is required');
             return;
         }
 
         setLoading(true);
+        const toastId = toast.loading('Saving project changes & updating media...');
 
         try {
             const formData = new FormData();
@@ -155,15 +158,18 @@ export default function EditProjectModal({ project, isOpen, onClose, onProjectUp
             }
 
             setSuccessMsg('Project updated successfully!');
+            toast.success('Project updated successfully!', { id: toastId });
             if (onProjectUpdated) {
                 onProjectUpdated(updatedProject);
             }
 
             setTimeout(() => {
                 onClose();
-            }, 800);
+            }, 600);
         } catch (err) {
-            setErrorMsg(err.message || 'Failed to update project. Please try again.');
+            const errText = err.message || 'Failed to update project. Please try again.';
+            setErrorMsg(errText);
+            toast.error(errText, { id: toastId });
         } finally {
             setLoading(false);
         }

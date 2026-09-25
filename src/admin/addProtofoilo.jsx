@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { getAuthHeaders } from '../utils/auth';
 
 export default function AddPortfolio({ onProjectAdded }) {
@@ -59,10 +60,12 @@ export default function AddPortfolio({ onProjectAdded }) {
 
         if (!name.trim()) {
             setErrorMsg('Project name is required');
+            toast.error('Project name is required');
             return;
         }
 
         setLoading(true);
+        const toastId = toast.loading('Uploading images & saving project...');
 
         try {
             // Filter out empty images or fallback to default
@@ -135,7 +138,9 @@ export default function AddPortfolio({ onProjectAdded }) {
                 console.warn('LocalStorage quota reached, project safely stored in MongoDB Atlas:', storageErr);
             }
 
-            setSuccessMsg(`Project "${name}" added successfully to MongoDB Atlas & Cloudinary!`);
+            const successMessage = `Project "${name}" added successfully to MongoDB Atlas & Cloudinary!`;
+            setSuccessMsg(successMessage);
+            toast.success(successMessage, { id: toastId });
 
             // Reset form
             setName('');
@@ -151,7 +156,9 @@ export default function AddPortfolio({ onProjectAdded }) {
                 onProjectAdded(savedProject);
             }
         } catch (err) {
-            setErrorMsg(err.message || 'Failed to save project. Please try again.');
+            const errText = err.message || 'Failed to save project. Please try again.';
+            setErrorMsg(errText);
+            toast.error(errText, { id: toastId });
         } finally {
             setLoading(false);
         }

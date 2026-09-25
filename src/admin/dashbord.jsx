@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import Slidebar from './slidebar';
 import AddPortfolio from './addProtofoilo';
 import EmailInbox from './email';
@@ -84,12 +85,15 @@ export default function Dashboard() {
 
     const handleLogout = () => {
         localStorage.removeItem('melan_admin_auth');
+        toast.success('Signed out successfully.');
         navigate('/cmsdash-login');
     };
 
     const handleDeleteProject = async (id) => {
         if (!id) return;
         if (!window.confirm('Are you sure you want to delete this project?')) return;
+
+        const toastId = toast.loading('Deleting project...');
 
         // Delete from local storage
         const localCustom = JSON.parse(localStorage.getItem('melan_custom_projects') || '[]');
@@ -103,8 +107,9 @@ export default function Dashboard() {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
+            toast.success('Project deleted successfully.', { id: toastId });
         } catch {
-            // Ignore server errors
+            toast.success('Project removed from list.', { id: toastId });
         }
 
         setProjects(prev => prev.filter(p => (p.id !== id && p._id !== id)));
@@ -132,6 +137,7 @@ export default function Dashboard() {
     const handleSyncGitHub = async () => {
         setSyncingGitHub(true);
         setSyncMsg('');
+        const toastId = toast.loading('Scanning & importing projects from GitHub...');
         try {
             const githubRes = await fetch('https://api.github.com/users/melan-Akash/repos?per_page=100').then(r => r.json());
             if (!Array.isArray(githubRes)) throw new Error('Could not fetch GitHub repositories');
@@ -169,10 +175,13 @@ export default function Dashboard() {
             }
 
             await loadProjects();
-            setSyncMsg(addedCount > 0 ? `Successfully imported ${addedCount} live projects from GitHub!` : 'All live GitHub projects are already synced!');
+            const successMsg = addedCount > 0 ? `Successfully imported ${addedCount} live projects from GitHub!` : 'All live GitHub projects are already synced!';
+            setSyncMsg(successMsg);
+            toast.success(successMsg, { id: toastId });
             setTimeout(() => setSyncMsg(''), 5000);
         } catch (err) {
             setSyncMsg(`Sync error: ${err.message}`);
+            toast.error(`Sync error: ${err.message}`, { id: toastId });
         } finally {
             setSyncingGitHub(false);
         }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import navLogoLight from '../assests/logo_for_navbar_lightmood.png';
 import navLogoDark from '../assests/logo_for_navbar_darkmood.png';
 
@@ -29,11 +30,14 @@ export default function Login() {
         setError('');
 
         if (!username.trim() || !password.trim()) {
-            setError('Please enter both your admin username/email and password.');
+            const msg = 'Please enter both your admin username/email and password.';
+            setError(msg);
+            toast.error(msg);
             return;
         }
 
         setLoading(true);
+        const toastId = toast.loading('Verifying admin credentials...');
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -50,13 +54,18 @@ export default function Login() {
                     token: res.token,
                     user: res.user
                 }));
+                toast.success('Welcome back, Melan!', { id: toastId });
                 navigate('/admin', { replace: true });
                 return;
             }
 
-            setError(res?.message || 'Access Denied: Invalid admin username or password.');
+            const errorMsg = res?.message || 'Access Denied: Invalid admin username or password.';
+            setError(errorMsg);
+            toast.error(errorMsg, { id: toastId });
         } catch {
-            setError('Unable to connect to backend server. Make sure server is running on port 5000.');
+            const errorMsg = 'Unable to connect to backend server. Make sure server is running on port 5000.';
+            setError(errorMsg);
+            toast.error(errorMsg, { id: toastId });
         } finally {
             setLoading(false);
         }

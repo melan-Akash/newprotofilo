@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { ProfileProvider } from './context/ProfileContext';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -55,6 +56,34 @@ export default function App() {
     return (
         <ProfileProvider>
             <BrowserRouter>
+                <Toaster
+                    position="top-right"
+                    reverseOrder={false}
+                    toastOptions={{
+                        duration: 3500,
+                        style: {
+                            background: '#0c182d',
+                            color: '#fff',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '16px',
+                            fontSize: '13px',
+                            fontFamily: 'Outfit, sans-serif',
+                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+                        },
+                        success: {
+                            iconTheme: {
+                                primary: '#0ea5e9',
+                                secondary: '#fff'
+                            }
+                        },
+                        error: {
+                            iconTheme: {
+                                primary: '#ef4444',
+                                secondary: '#fff'
+                            }
+                        }
+                    }}
+                />
                 <Routes>
                     {/* Client Portfolio */}
                     <Route path="/" element={<MainPortfolio />} />
