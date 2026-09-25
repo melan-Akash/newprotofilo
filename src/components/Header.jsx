@@ -88,9 +88,9 @@ export default function Header() {
                 </motion.a>
 
                 <motion.a
-                    href={profile?.resumeUrl || "./assets/dev-icon.png"}
-                    download
-                    target="_blank"
+                    href={profile?.resumeUrl || "#contact"}
+                    download={profile?.resumeUrl ? true : undefined}
+                    target={profile?.resumeUrl ? "_blank" : undefined}
                     rel="noreferrer"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

@@ -50,6 +50,86 @@ export default function ProjectDetails() {
         return () => { isMounted = false; };
     }, [id]);
 
+    // Automatic Dynamic SEO (Title, Description, OpenGraph, Twitter, JSON-LD Schema)
+    useEffect(() => {
+        if (!project) return;
+
+        const defaultTitle = "Melan Akash | Full Stack Developer & Associate Software Engineer";
+        const defaultDesc = "Portfolio of Melan Akash, an Associate Software Engineer & Full Stack Developer based in Sri Lanka specializing in React, Next.js, Node.js, Spring Boot, .NET, PostgreSQL, MongoDB, and AI web applications.";
+
+        const projectTitle = `${project.name} | Melan Akash Portfolio`;
+        const projectDesc = project.overview || project.description || `Explore ${project.name}, a full-stack project engineered by Melan Akash.`;
+        const projectImg = project.image || (project.images && project.images[0]) || 'https://melanakash.dev/assets/work-1.png';
+        const projectUrl = window.location.href;
+
+        // 1. Page Title
+        document.title = projectTitle;
+
+        // 2. Helper to set or create meta tags
+        const setMeta = (attr, key, val) => {
+            let el = document.querySelector(`meta[${attr}="${key}"]`);
+            if (!el) {
+                el = document.createElement('meta');
+                el.setAttribute(attr, key);
+                document.head.appendChild(el);
+            }
+            el.setAttribute('content', val);
+        };
+
+        // Standard Meta
+        setMeta('name', 'description', projectDesc);
+        setMeta('name', 'title', projectTitle);
+
+        // OpenGraph
+        setMeta('property', 'og:title', projectTitle);
+        setMeta('property', 'og:description', projectDesc);
+        setMeta('property', 'og:image', projectImg);
+        setMeta('property', 'og:url', projectUrl);
+        setMeta('property', 'og:type', 'article');
+
+        // Twitter
+        setMeta('name', 'twitter:title', projectTitle);
+        setMeta('name', 'twitter:description', projectDesc);
+        setMeta('name', 'twitter:image', projectImg);
+        setMeta('name', 'twitter:url', projectUrl);
+
+        // Canonical
+        let canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute('href', projectUrl);
+
+        // 3. Structured Data (JSON-LD) for Search Engines (Google/Bing)
+        let schemaScript = document.getElementById('project-jsonld');
+        if (!schemaScript) {
+            schemaScript = document.createElement('script');
+            schemaScript.id = 'project-jsonld';
+            schemaScript.type = 'application/ld+json';
+            document.head.appendChild(schemaScript);
+        }
+        schemaScript.textContent = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": project.name,
+            "description": projectDesc,
+            "applicationCategory": "WebApplication",
+            "operatingSystem": "All",
+            "url": project.live || projectUrl,
+            "author": {
+                "@type": "Person",
+                "name": "Melan Akash",
+                "url": "https://melanakash.dev/"
+            }
+        });
+
+        return () => {
+            document.title = defaultTitle;
+            setMeta('name', 'description', defaultDesc);
+            setMeta('property', 'og:title', defaultTitle);
+            setMeta('property', 'og:description', defaultDesc);
+            const scriptToRemove = document.getElementById('project-jsonld');
+            if (scriptToRemove) scriptToRemove.remove();
+        };
+    }, [project]);
+
     const toggleTheme = () => {
         document.documentElement.classList.toggle('dark');
         localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';

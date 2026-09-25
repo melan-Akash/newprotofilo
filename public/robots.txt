@@ -1,0 +1,9 @@
+# robots.txt for Melan Akash Portfolio
+User-agent: *
+Allow: /
+Disallow: /cmsdash-login
+Disallow: /admin
+Disallow: /cms-login
+
+# Dynamic & Static Sitemap
+Sitemap: https://melanakash.dev/sitemap.xml

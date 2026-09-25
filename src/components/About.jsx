@@ -134,7 +134,7 @@ export default function About() {
                         transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
                     >
                         <img src="./assets/circular-text.png" alt="" className="w-full" />
-                        <img src="./assets/dev-icon.png" alt="" className="w-1/4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                        <img src="./assets/favicon.svg" alt="Melan Akash Developer" className="w-[34%] rounded-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm" />
                     </motion.div>
                 </motion.div>
 
