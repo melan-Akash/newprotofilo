@@ -4,6 +4,7 @@ import Slidebar from './slidebar';
 import AddPortfolio from './addProtofoilo';
 import EmailInbox from './email';
 import ProfileSetting from './profileSetting';
+import { getAuthHeaders } from '../utils/auth';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function Dashboard() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [syncingGitHub, setSyncingGitHub] = useState(false);
+    const [syncMsg, setSyncMsg] = useState('');
 
     // Verify authentication with backend
     useEffect(() => {
@@ -93,12 +96,64 @@ export default function Dashboard() {
         // Delete from server (MongoDB)
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await fetch(`${apiUrl}/projects/${id}`, { method: 'DELETE' });
+            await fetch(`${apiUrl}/projects/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
         } catch {
             // Ignore server errors
         }
 
         setProjects(prev => prev.filter(p => (p.id !== id && p._id !== id)));
+    };
+
+    const handleSyncGitHub = async () => {
+        setSyncingGitHub(true);
+        setSyncMsg('');
+        try {
+            const githubRes = await fetch('https://api.github.com/users/melan-Akash/repos?per_page=100').then(r => r.json());
+            if (!Array.isArray(githubRes)) throw new Error('Could not fetch GitHub repositories');
+
+            const liveRepos = githubRes.filter(r => r.homepage && r.homepage.trim().startsWith('http'));
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+            let addedCount = 0;
+            for (const repo of liveRepos) {
+                const alreadyExists = projects.some(p =>
+                    (p.name && repo.name && p.name.toLowerCase().includes(repo.name.toLowerCase())) ||
+                    (p.live && repo.homepage && p.live.toLowerCase().includes(repo.homepage.toLowerCase()))
+                );
+
+                if (!alreadyExists) {
+                    const cleanName = repo.name.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    const formData = new FormData();
+                    formData.append('name', cleanName);
+                    formData.append('description', repo.description || `${cleanName} - Live Project`);
+                    formData.append('overview', repo.description || `${cleanName} - Built with modern full-stack engineering.`);
+                    formData.append('tech', repo.language ? `${repo.language} · Full Stack` : 'JavaScript · React · Node.js');
+                    formData.append('year', new Date(repo.updated_at || Date.now()).getFullYear().toString());
+                    formData.append('live', repo.homepage);
+                    formData.append('github', repo.html_url);
+                    formData.append('images', JSON.stringify(['./assets/work-1.png']));
+
+                    const res = await fetch(`${apiUrl}/projects`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: formData
+                    }).then(r => r.json());
+
+                    if (res?.success) addedCount++;
+                }
+            }
+
+            await loadProjects();
+            setSyncMsg(addedCount > 0 ? `Successfully imported ${addedCount} live projects from GitHub!` : 'All live GitHub projects are already synced!');
+            setTimeout(() => setSyncMsg(''), 5000);
+        } catch (err) {
+            setSyncMsg(`Sync error: ${err.message}`);
+        } finally {
+            setSyncingGitHub(false);
+        }
     };
 
     return (
@@ -253,13 +308,30 @@ export default function Dashboard() {
                                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">All Portfolio Projects</h1>
                                     <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">Manage and organize all projects shown on your website.</p>
                                 </div>
-                                <button
-                                    onClick={() => setActiveTab('add')}
-                                    className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold"
-                                >
-                                    + Add New
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleSyncGitHub}
+                                        disabled={syncingGitHub}
+                                        className="px-3.5 py-2 rounded-xl bg-gray-900 dark:bg-white/10 hover:bg-gray-800 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                                        title="Import repositories with live sites from GitHub"
+                                    >
+                                        {syncingGitHub ? 'Syncing...' : '⚡ Sync from GitHub'}
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('add')}
+                                        className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold"
+                                    >
+                                        + Add New
+                                    </button>
+                                </div>
                             </div>
+
+                            {syncMsg && (
+                                <div className="p-3.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-600 dark:text-sky-400 text-xs flex items-center justify-between">
+                                    <span>{syncMsg}</span>
+                                    <button onClick={() => setSyncMsg('')} className="font-bold ml-2">×</button>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {projects.map((proj) => (
