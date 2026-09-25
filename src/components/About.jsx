@@ -134,7 +134,7 @@ export default function About() {
                         transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
                     >
                         <img src="./assets/circular-text.png" alt="" className="w-full" />
-                        <img src="./assets/favicon.svg" alt="Melan Akash Developer" className="w-[34%] rounded-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm" />
+                        <img src="./assets/logo_for_lightmood.png" alt="Melan Akash Logo" className="w-[38%] object-contain absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                     </motion.div>
                 </motion.div>
 
